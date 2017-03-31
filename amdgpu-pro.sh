@@ -6,19 +6,6 @@ then
         echo "uninstalling"
         exit
 fi
-spin='-\|/'
-i=0
-x=1
-v=2
-e=3
-rotate ()
-{
-i=$(( (i+1) %4 ))
-x=$(( (x+1) %4 ))
-v=$(( (v+1) %4 ))
-e=$(( (e+1) %4 ))
-printf "\r${spin:$i:1} ${spin:$x:1} ${spin:$v:1} ${spin:$e:1}"
-}
 AMDGPU_PRO_ROOT_DIRECTORY="$(pwd)"
 AMDGPU_PRO_ROOT_DIRECTORY=${AMDGPU_PRO_ROOT_DIRECTORY}
 AMDGPU_PRO_TAR_NAME="$(ls -1 | grep -i *.tar* | grep -i amdgpu-pro)"
@@ -44,7 +31,7 @@ read -p "             " opt
             exit
             ;;
     esac
-if [ -d amdgpu-pro-driver ]
+if [ -d amdgpu-pro-install ]
     then
     echo "PREVIOUS INSTALL CACHE FOUND.  PURGE BEFORE NEW INSTALL?"
     options=("PURGE" "IGNORE")
@@ -53,7 +40,7 @@ if [ -d amdgpu-pro-driver ]
             case $opt in
                 "PURGE")
                 echo "CLEARING PREVIOUS INSTALL FILES"
-                rm -rf $AMDGPU_PRO_ROOT_DIRECTORY/amdgpu-pro-driver
+                rm -rf $AMDGPU_PRO_ROOT_DIRECTORY/amdgpu-pro-install
                 break
                 ;;
                 "IGNORE")
@@ -67,11 +54,12 @@ if [ -d amdgpu-pro-driver ]
         done
 fi
 echo "EXTRACTING AMD DEBIAN PACKAGE"
-tar -xf $AMDGPU_PRO_ROOT_DIRECTORY/$AMDGPU_PRO_TAR_NAME
-echo "changing working directory to: "$AMDGPU_PRO_ROOT_DIRECTORY"/amdgpu-pro-driver/"
-AMDGPU_PRO_BASE_DIRECTORY=$AMDGPU_PRO_ROOT_DIRECTORY"/amdgpu-pro-driver/"
+mkdir $AMDGPU_PRO_ROOT_DIRECTORY/amdgpu-pro-install
+tar -xf $AMDGPU_PRO_ROOT_DIRECTORY/$AMDGPU_PRO_TAR_NAME --strip 1 -C $AMDGPU_PRO_ROOT_DIRECTORY/amdgpu-pro-install/
+echo "changing working directory to: "$AMDGPU_PRO_ROOT_DIRECTORY"/amdgpu-pro-install/"
+AMDGPU_PRO_BASE_DIRECTORY=${AMDGPU_PRO_ROOT_DIRECTORY}/amdgpu-pro-install
 cd $AMDGPU_PRO_BASE_DIRECTORY
-rm $AMDGPU_PRO_BASE_DIRECTORY/amdgpu-pro-install $AMDGPU_PRO_BASE_DIRECTORY/Packages.gz
+rm $AMDGPU_PRO_BASE_DIRECTORY/amdgpu-pro-install $AMDGPU_PRO_BASE_DIRECTORY/Packages $AMDGPU_PRO_BASE_DIRECTORY/Release
 AMDGPU_PRO_DEBLIST="$(ls -1 | grep -i .deb)"
 for each in $AMDGPU_PRO_DEBLIST
 do
@@ -79,19 +67,14 @@ do
         AMDGPU_PRO_DEBtoken="${each}"
         mkdir $AMDGPU_PRO_DIRtoken
         mv $AMDGPU_PRO_DEBtoken $AMDGPU_PRO_DIRtoken
-                rotate
         cd $AMDGPU_PRO_DIRtoken
-                rotate
         ar vx $AMDGPU_PRO_DEBtoken > /dev/null
-                rotate
         tar -xf data.tar.xz > /dev/null
-                rotate
         rm data.tar.xz
         rm debian-binary
         rm control.tar.gz
         rm $AMDGPU_PRO_DEBtoken
 cd ..
-        rotate
 done
 AMDGPU_PRO_DIRLIST="$(ls -1)"
 for each in $AMDGPU_PRO_DIRLIST
@@ -99,20 +82,15 @@ do
         AMDGPU_PRO_DIRtoken="${each}"
         cd $AMDGPU_PRO_DIRtoken
         rsync -av ./ ../ > /dev/null
-        cd ..
-        rotate
+        cd $AMDGPU_PRO_ROOT_DIRECTORY/amdgpu-pro-install
 done
 mkdir $AMDGPU_PRO_BASE_DIRECTORY/DRIVER
 mv $AMDGPU_PRO_BASE_DIRECTORY/etc DRIVER/
 mv $AMDGPU_PRO_BASE_DIRECTORY/usr DRIVER/
 mv $AMDGPU_PRO_BASE_DIRECTORY/lib DRIVER/
-find $AMDGPU_PRO_BASE_DIRECTORY"DRIVER" -type f -print0 | xargs -0 md5sum > $AMDGPU_PRO_BASE_DIRECTORY"DRIVER/AMDGPU_PRO_manifest.md5"
+mv $AMDGPU_PRO_BASE_DIRECTORY/opt DRIVER/
 cd DRIVER
 printf "\n"
-
-md5="${cat $AMDGPU_PRO_BASE_DIRECTORY"DRIVER"/AMDGPU_PRO_manifest.md5 | cut -d ' ' -f 1}"
-echo $md5
-
 echo "MERGING ETC"
 rsync -av etc/ /etc/ > /dev/null
 echo "MERGING LIB"
