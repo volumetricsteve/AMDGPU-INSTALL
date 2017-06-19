@@ -1,13 +1,17 @@
 #!/bin/bash
 clear
+AMDGPU_PRO_ROOT_DIRECTORY="$(pwd)"
 if [ "$1" = "uninstall" ]
 then
         #uninstall stuff
         echo "uninstalling"
         exit
 fi
-AMDGPU_PRO_ROOT_DIRECTORY="$(pwd)"
-AMDGPU_PRO_ROOT_DIRECTORY=${AMDGPU_PRO_ROOT_DIRECTORY}
+if [ "$1" = "clean" ]
+then
+rm -rf $AMDGPU_PRO_ROOT_DIRECTORY/amdgpu-pro-installdir
+exit
+fi
 AMDGPU_PRO_TAR_NAME="$(ls -1 | grep -i .tar.xz | grep -i amdgpu)"
 echo "TAR name:"$AMDGPU_PRO_TAR_NAME
 echo "Root tar Directory:"$AMDGPU_PRO_ROOT_DIRECTORY
@@ -31,7 +35,7 @@ read -p "             " opt
             exit
             ;;
     esac
-if [ -d amdgpu-pro-install ]
+if [ -d amdgpu-pro-installdir ]
     then
     echo "PREVIOUS INSTALL CACHE FOUND.  PURGE BEFORE NEW INSTALL?"
     options=("PURGE" "IGNORE")
@@ -40,7 +44,7 @@ if [ -d amdgpu-pro-install ]
             case $opt in
                 "PURGE")
                 echo "CLEARING PREVIOUS INSTALL FILES"
-                rm -rf $AMDGPU_PRO_ROOT_DIRECTORY/amdgpu-pro-install
+                rm -rf $AMDGPU_PRO_ROOT_DIRECTORY/amdgpu-pro-installdir
                 break
                 ;;
                 "IGNORE")
@@ -54,12 +58,32 @@ if [ -d amdgpu-pro-install ]
         done
 fi
 echo "EXTRACTING AMD DEBIAN PACKAGE"
-mkdir $AMDGPU_PRO_ROOT_DIRECTORY/amdgpu-pro-install
-tar -xf $AMDGPU_PRO_ROOT_DIRECTORY/$AMDGPU_PRO_TAR_NAME --strip 1 -C $AMDGPU_PRO_ROOT_DIRECTORY/amdgpu-pro-install/
-echo "changing working directory to: "$AMDGPU_PRO_ROOT_DIRECTORY"/amdgpu-pro-install/"
-AMDGPU_PRO_BASE_DIRECTORY=${AMDGPU_PRO_ROOT_DIRECTORY}/amdgpu-pro-install
+mkdir $AMDGPU_PRO_ROOT_DIRECTORY/amdgpu-pro-installdir
+tar -xf $AMDGPU_PRO_ROOT_DIRECTORY/$AMDGPU_PRO_TAR_NAME --strip 1 -C $AMDGPU_PRO_ROOT_DIRECTORY/amdgpu-pro-installdir/
+echo "changing working directory to: "$AMDGPU_PRO_ROOT_DIRECTORY"/amdgpu-pro-installdir/"
+AMDGPU_PRO_BASE_DIRECTORY=${AMDGPU_PRO_ROOT_DIRECTORY}/amdgpu-pro-installdir
 cd $AMDGPU_PRO_BASE_DIRECTORY
 rm $AMDGPU_PRO_BASE_DIRECTORY/amdgpu-pro-install $AMDGPU_PRO_BASE_DIRECTORY/Packages $AMDGPU_PRO_BASE_DIRECTORY/Release
+if [ "$1" = "compute" ] 
+	then
+	echo "INSTALLING 64-BIT COMPUTE DRIVERS ONLY"
+	mkdir $AMDGPU_PRO_BASE_DIRECTORY/tmp
+	mv clinfo-amdgpu-pro_17.10-429170_amd64.deb $AMDGPU_PRO_BASE_DIRECTORY/tmp/
+	mv opencl-amdgpu-pro-icd_17.10-429170_amd64.deb $AMDGPU_PRO_BASE_DIRECTORY/tmp/
+	mv amdgpu-pro-dkms_17.10-429170_all.deb $AMDGPU_PRO_BASE_DIRECTORY/tmp/
+	mv libdrm2-amdgpu-pro_2.4.70-429170_amd64.deb $AMDGPU_PRO_BASE_DIRECTORY/tmp/
+	mv libdrm-amdgpu-pro-amdgpu1_2.4.70-429170_amd64.deb $AMDGPU_PRO_BASE_DIRECTORY/tmp/
+		rm *.deb
+	mv $AMDGPU_PRO_BASE_DIRECTORY/tmp/* $AMDGPU_PRO_BASE_DIRECTORY/
+	rmdir $AMDGPU_PRO_BASE_DIRECTORY/tmp/
+		if [ $(ls $AMDGPU_PRO_BASE_DIRECTORY/ | wc -l) = 5 ]
+			then
+			echo "CORRECT NUMBER OF MODULES REMAINING :: PROCEEDING"
+		else
+			echo "INCORRECT NUMBER OF MODULES FOUND :: EXITING"
+			exit
+		fi
+fi
 AMDGPU_PRO_DEBLIST="$(ls -1 | grep -i .deb)"
 for each in $AMDGPU_PRO_DEBLIST
 do
@@ -82,7 +106,7 @@ do
         AMDGPU_PRO_DIRtoken="${each}"
         cd $AMDGPU_PRO_DIRtoken
         rsync -av ./ ../ > /dev/null
-        cd $AMDGPU_PRO_ROOT_DIRECTORY/amdgpu-pro-install
+        cd $AMDGPU_PRO_ROOT_DIRECTORY/amdgpu-pro-installdir
 done
 mkdir $AMDGPU_PRO_BASE_DIRECTORY/DRIVER
 mv $AMDGPU_PRO_BASE_DIRECTORY/etc DRIVER/
@@ -92,10 +116,10 @@ mv $AMDGPU_PRO_BASE_DIRECTORY/opt DRIVER/
 cd DRIVER
 printf "\n"
 echo "MERGING ETC"
-rsync -av etc/ /etc/ > /dev/null
+#rsync -av etc/ /etc/ > /dev/null
 echo "MERGING LIB"
-rsync -av lib/ /lib/ > /dev/null
+#rsync -av lib/ /lib/ > /dev/null
 echo "MERGING USR"
-rsync -av usr/ /usr/ > /dev/null
+#rsync -av usr/ /usr/ > /dev/null
 echo "MERGING OPT"
-rsync -av opt/ /opt/ > /dev/null
+#rsync -av opt/ /opt/ > /dev/null
