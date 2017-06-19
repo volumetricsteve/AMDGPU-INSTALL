@@ -116,10 +116,10 @@ mv $AMDGPU_PRO_BASE_DIRECTORY/opt DRIVER/
 cd DRIVER
 printf "\n"
 echo "MERGING ETC"
-#rsync -av etc/ /etc/ > /dev/null
+rsync -av etc/ /etc/ > /dev/null
 echo "MERGING LIB"
-#rsync -av lib/ /lib/ > /dev/null
+rsync -av lib/ /lib/ > /dev/null
 echo "MERGING USR"
-#rsync -av usr/ /usr/ > /dev/null
+rsync -av usr/ /usr/ > /dev/null
 echo "MERGING OPT"
-#rsync -av opt/ /opt/ > /dev/null
+rsync -av opt/ /opt/ > /dev/null
