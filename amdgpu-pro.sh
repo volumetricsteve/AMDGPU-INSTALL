@@ -8,7 +8,7 @@ then
 fi
 AMDGPU_PRO_ROOT_DIRECTORY="$(pwd)"
 AMDGPU_PRO_ROOT_DIRECTORY=${AMDGPU_PRO_ROOT_DIRECTORY}
-AMDGPU_PRO_TAR_NAME="$(ls -1 | grep -i *.tar* | grep -i amdgpu-pro)"
+AMDGPU_PRO_TAR_NAME="$(ls -1 | grep -i .tar.xz | grep -i amdgpu)"
 echo "TAR name:"$AMDGPU_PRO_TAR_NAME
 echo "Root tar Directory:"$AMDGPU_PRO_ROOT_DIRECTORY
 echo ""
@@ -97,3 +97,5 @@ echo "MERGING LIB"
 rsync -av lib/ /lib/ > /dev/null
 echo "MERGING USR"
 rsync -av usr/ /usr/ > /dev/null
+echo "MERGING OPT"
+rsync -av opt/ /opt/ > /dev/null
