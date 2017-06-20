@@ -123,3 +123,6 @@ echo "MERGING USR"
 rsync -av usr/ /usr/ > /dev/null
 echo "MERGING OPT"
 rsync -av opt/ /opt/ > /dev/null
+echo "REPLACING ICD"
+cp $AMDGPU_PRO_BASE_DIRECTORY/DRIVER/opt/amdgpu-pro/lib/x86_64-linux-gnu/* /lib > /dev/null
+echo "DONE"
