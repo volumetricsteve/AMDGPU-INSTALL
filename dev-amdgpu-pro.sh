@@ -3,8 +3,9 @@
 clear
 AMDGPU_PRO_ROOT_DIRECTORY="$(pwd)"
 
-if [ "$1" = "uninstall" ]
+if [ "$1" = "uninstall" ] || [ "$1" = "-uninstall" ]
 then
+	echo "this will rip and tear until it is done"
 	echo "building uninstall manifest"
 	manifest=$(du -a $(pwd) | cut -f2 | awk '{ print $1 }')
 	echo "gathering md5sums"
@@ -17,7 +18,7 @@ done
         exit
 fi
 
-if [ "$1" = "clean" ]
+if [ "$1" = "clean" ] || [ "$1" = "-clean" ]
 then
 rm -rf $AMDGPU_PRO_ROOT_DIRECTORY/amdgpu-pro-installdir
 exit
