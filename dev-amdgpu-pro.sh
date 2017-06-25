@@ -7,16 +7,43 @@ if [ "$1" = "uninstall" ] || [ "$1" = "-uninstall" ]
 then
 	echo "this will rip and tear until it is done"
 	echo "building uninstall manifest"
-	manifest=$(du -a $(pwd) | cut -f2 | awk '{ print $1 }')
+	uninstall_root="$AMDGPU_PRO_ROOT_DIRECTORY/amdgpu-pro-installdir/DRIVER"
+	if [ -d $uninstall_root ]
+	then
+		echo "ready to build manifest"
+	else
+		echo "missing install files :: please run installer before uninstalling"
+		exit
+	fi
+	if [ -f $uninstall_root/manifest.db ]
+	then
+		rm $uninstall_root/manifest.db
+	fi
+	if [ -f $uninstall_root/sort.db ]
+	then
+		rm $uninstall_root/sort.db
+	fi
+	manifest=$(du -a $uninstall_root | cut -f2 | awk '{ print $1 }')
 	echo "gathering md5sums"
 	for each in $manifest
 do
         target_dir="${each}"
-        md5sum $target_dir >> $AMDGPU_PRO_ROOT_DIRECTORY/manifest.db 2>&1
+        md5sum $target_dir >> $uninstall_root/manifest.db 2>&1
 done
+	cat $uninstall_root/manifest.db | sort > $uninstall_root/sort.db 2>&1
+	mv $uninstall_root/sort.db $uninstall_root/manifest.db
         echo "uninstalling"
         exit
 fi
+
+#you need a way to build a manifest based on what's installed locally, probably 
+#manifest=$(du -a /etc | cut -f2 | awk '{ print $1 }')
+#manifest=$(du -a $uninstall_root | cut -f2 | awk '{ print $1 }')
+#somewhere you need to do a line by line comparion of what comes out of the other manifest,
+#ideally, if you start your directories on 'DRIVER' pseudo-locally and do etc,usr, lib. and 
+#whatever locally, it should be easier to line up which files you're comparing
+#NOTE: cat manifest.db | sed '12q;d' | cut -d ' ' -f3 to isolate the full paths of elements in manifest.db
+
 
 if [ "$1" = "clean" ] || [ "$1" = "-clean" ]
 then
