@@ -1,0 +1,54 @@
+(6/19/2017)The new script is on github.  After installing the AMDAPP-SDK (linked below) and running a small repair script I put together, I'm able to compile and run OpenCL apps.  I rebuilt ffmpeg-3.2.2 with --enable-opencl and it appears to be working.  I transcoded a 16MB wav file to mp3 in 2 seconds.  This marks the first tested and stable version of my amdgpu-pro installer script.
+
+
+(6/19/2017) I've written a chunk of new code and fixed some issues that should make it safer to execute.  I've manually traced all the directory switching from start to finish so there should be no file-explosions like in 16.60.  Of course if you find bugs, please let me know.  I'll post the updated (as of today) script in a few hours.  I've added the 'install compute only' mechanism, and you do ./amdgpu-pro.sh compute to invoke it from the command line.  I've also added a 'clean' function that's called similarly:  ./amdgpu-pro.sh clean   Currently, the compute driver install only moves in the 64 bit packages, the 32s may be needed as well, I'm not sure...but they shouldn't be.
+
+
+(6/18/2017) Strangely, the last script seemed to work fine almost immediately.  At present, I've changed one line of code and it -appears- to work fine.  This time it didn't shred my filesystem like 16.60 did, so I'm not sure what happened.  I will always advise that you have backups in place before using unofficial code (such as mine), but this time I'm less worried about it.  AMDGPU-PRO 17.10 for less common distros should be good to go.  Please check the links below.  I noticed in the base installer script provided by AMD there's a "compute only" flag I'd like to try to emulate, because that actually suits my needs better.  Please report bugs!!!!
+
+
+(6/17/2017) How quickly the time shoots by.  I'm going to be working on 17.10 shortly, I never did work out what went wrong with my last script but I'm hoping 17.10 will be more cooperative.  I have a sudden and great need for FFTs and OpenCL in my life, so hopefully I can knock this out quickly.
+
+
+(4/1/2017) There appears to be some potential issues with the scripts, so if you're going to use it, I must advise you to make a full backup of your system first (which you should be doing anyway) I'm working on this now.
+
+
+(3/31/2017) I think I'm ready to go with 16.60, I'm posting the new script to github now.  I've been locking down how the script accesses directories out of an abundance of caution, so that's all more iron-clad than it was.  Still, please be advised this is provided without any guarantee.  Good luck out there.  I ran out of time today to test it on my own AMD system, but the driver expansion/installation seems to work now.  Check back soon, I'll be verifying the script this weekend.
+
+
+(3/29/2017) I'm updating the script to work with the 16.60 driver, I should have it fixed by tomorrow.
+
+
+(3/9/2017) It's amazing how quickly months can fly by.  I still need to write the uninstaller, but I did drop the script on github which will at least help me clean up this thread.  My thinking for the uninstaller is that it should be able to generate an uninstaller based on the contents of the install package, and work backwards from there using md5sum to verify files and asking permission to remove ones that don't match.  See the script at its new home:  https://github.com/volumetricsteve/AMDGPU-INSTALL/blob/master/amdgpu-pro.sh
+
+
+(10/24/2016)OpenCL seems to work.  I did some tinkering with compiling really simple OpenCL code and I've produced some working binaries, though they seg. fault on CPU loads, it might just be the test I'm using.  I installed the AMDAPPSDK-3.0 on top of what my driver script does.  Additionally, and this was key, the libOpenCL.so.1 file seems to be neglected in the install for some reason?  I manually copied it to /usr/lib/ and everything was "normal" after that (manual including and linking at gcc compile time was still required)  Additional reading:  https://wiki.tiker.net/OpenCLHowTo
+
+
+(10/20/2016) It's been hard to find a lot of time at home to work on Ubuntu lately.  My car is dying/dead and I have to buy a new one, which has been a long time coming.  I'm still looking into the unistaller/xorg stuff, but I've kinda burnt out on code for now so I ended up writing a short horror story instead.  Go figure.  I'm hoping next week will be more forgiving.  I would, after all, like this to work on my own system
+
+
+(10/17/2016) Getting ready to install ubuntu 16.04 on my research system so I can try to get a better sense of exactly what the packages do when they install.  I thought I'd be able to figure out more from the amdgpu-pro-install script, but it doesn't do nearly as much as I'd think.  Hopefully I can sort some of this out tonight or tomorrow.  I got a little farther on the uninstaller.  It'll be uninstallable by "./amdgpu-pro.sh uninstall" and it'll execute a whole different branch of code within the script.
+
+
+(10/14/2016) Some light tidying up and fixing some non-critical issues.  Still looking into the uninstaller/Xorg stuff.
+
+
+(10/13/2016)(Again) NEW SCRIPT POSTED BELOW: I got a lot more done today than I anticipated.  Part of that is due to ripping out all of the code that figures out which parts are x86-64 and which are i386, isolating them, and installing individual configurations.  That was all being done on the idea there were distinct sets of packages for both architectures but I'm starting to think that's not the case.  Anyway, the new code does virtually everything of import the old code did but in about 1/3rd the code, and much, much safer.  There still isn't an uninstaller, I'll have to do more research for that, but it looks like what I had in mind is kinda what debian does internally anyway, so that's a solved problem, I just need to figure out how to implement it.  Assuming you're installing on a system with a fixed-width font, everything should line up on the output.  It just looks messed up here.  I'll attach it as a file to the post when I'm back on a linux machine.  Oh, and I added 4 whirly-gigs.
+
+
+(10/13/2016) Working manually with debian packages is a bit of a mess.  I'm still wrapping my head around bash and my mind is still blown that I don't have to do any manual string manipulation or management of null characters.  C has melted my brain.  I stepped back and took a look at the contents of the main tar file again and noticed there's one .deb that seems to point to everything else, and it's only _amd64, it has no i386 counterpart, which leads me to believe that the i386 components of this install are required (because why else would they be there, then?) If AMD would like to weigh in on the x86/x86_64 compatibility of this driver, that'd be awesome. I don't see anything (maybe I missed it - going blind from staring at bash all week) on the AMDGPU-PRO download page that states a particular system requirement.  Anyway, I think in the interests of time...and maybe compatibility(?) I'm going to rework this all again to just install every .deb, regardless of i386 or amd64 architecture.   The installer will be a lot smaller, look a lot less horrible, and maybe work better, it'd be fishy to make a x86-64-only driver that depended on i386 libraries, but not impossible.  I don't know what I'll have done by tomorrow, the thing really holding me up is getting syntax right in bash.  I think I know exactly what needs to be done with the data, but it's usually a matter of tinkering with " ' [] () @ * etc to get things to work the way you expect them to.
+
+
+(10/11/2016) I'm hoping I'll have a fully refined script up by the end of the week, maybe sooner, but we'll see.  I think I've worked out fully-automatic directory creations based on what packages are being worked with, so that was key to making this script work for future versions of the driver.  I've found the scariest thing with bash is, I'll try ten things that all seem like they should have worked, only one does and I don't know why the one that works necessarily better than my other attempts.  I'm wondering how to get the script to pick up whatever a new driver release would be called...and I could do all this stuff with sed, awk and string manipulation, but I might just make it so the script expects to be in a directory with just itself and the driver package, and it'll just operate on whatever tar is in there with it.  I don't know how safe that is, but I guess if you've gotten far enough to need an off-label video card driver install method, it's probably not asking too much to just drop it in the same folder with whatever you're installing.
+
+
+(10/10/2016) I've made a TON of progress in cleaning up the script, and it will be a full fledged installer/uninstaller.  It shouldn't interact with a package manager in any way for any distribution.  I think in most cases you'd just 'sudo script.sh' and it'd guide you through the rest of the process.  I've got text input prompts working and a lot of automatic configuration.  The big thing I'm doing now is making this script ready for future driver releases without a rewrite.  If AMD keeps their structure basically the same, this same script *should* work the same way.  Right now, the script runs completely in bash, and I don't think it calls a single thing anyone should have to go dependency-spelunking for.  No bison or python, just bash and well-tested loops based on commands unix has had since the 1970s.  A lot of what I'm doing now is also a complete re-write so I like to do a lot of testing before I post it here.  The script posted here is still for tcsh, I've since moved everything to bash for the sake of reaching the widest possible audience.
+
+
+(10/8/2016)  I hit a snag with bash scripting.  It makes me appreciate the way C is set up, but bash seems like there's a lot of different ways to do very similar things.  Lots of things that'll partially execute or produce meaningless errors.  Hopefully I'll get that worked out soon and I can make this script much, much nicer for people to implement/borrow from.
+
+
+(10/7/2016)  I'd forgotten entirely there's a program called 'alien' that does something similar to what my script does, but it depends on perl and some other stuff.  If you want a more mature solution, Alien might help.  I still think it could be valuable to have a self-contained installer/uninstaller that's distro agnostic, so I'll continue to work on this.  Alien is no longer maintained, but still available.
+
+
