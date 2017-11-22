@@ -12,6 +12,15 @@ then
         done
         cat /tmp/AMDGPU_PRO_md5sum_output
         rm /tmp/AMDGPU_PRO_md5sum_output
+        #you have the manifest, cleared mostly of "It is a Directory" errors,
+        #except the last one..maybe the file should be parsed to remove the
+        #last line.  You still need a list of the files and where they live in the system.
+        #maybe what should happen is...since the relevant data is the md5sum, and the file
+        #name/location in reference to /etc/, /lib/, /usr/, /opt/ so hopefully there's some
+        #way to skip past the md5sum, and remove a chunk of the path prior to the core-directories
+        #that resultant list can be used to verify the install on the system, and when md5sums are
+        #matched, the md5sum field can be cut and the remaining list can be fed into 'rm'
+        #it might be safer to have this all done file-by-file instead of in phases
         exit
 fi
 if [ "$1" = "clean" ]
