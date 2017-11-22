@@ -3,8 +3,15 @@ clear
 AMDGPU_PRO_ROOT_DIRECTORY="$(pwd)"
 if [ "$1" = "uninstall" ]
 then
-        #uninstall stuff
+        AMDGPU_PRO_manifest=$(du -a $AMDGPU_PRO_ROOT_DIRECTORY/amdgpu-pro-installdir/DRIVER/ | cut -f2 | awk '{ print $1 }')
         echo "uninstalling"
+        for each in $AMDGPU_PRO_manifest
+        do
+                AMDGPU_PRO_md5sum="${each}"
+                md5sum $AMDGPU_PRO_md5sum 2> /tmp/AMDGPU_PRO_md5sum_output
+        done
+        cat /tmp/AMDGPU_PRO_md5sum_output
+        rm /tmp/AMDGPU_PRO_md5sum_output
         exit
 fi
 if [ "$1" = "clean" ]
