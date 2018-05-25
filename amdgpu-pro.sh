@@ -150,3 +150,21 @@ echo "MERGING USR"
 rsync -av usr/ /usr/ > /dev/null
 echo "MERGING OPT"
 rsync -av opt/ /opt/ > /dev/null
+echo "Do you want to ignore ABI mismatch errors?"
+read -p "y/n?" yn
+    case ${yn} in
+        "y")
+            touch /etc/X11/xorg.conf
+            echo "Adding IgnoreABI to your xorg.conf"
+            echo "Section "Server Flags"" >> /etc/X11/xorg.conf
+            echo "      Option          "IgnoreABI"" >> /etc/X11/xorg.conf
+            echo "EndSection" >> /etc/X11/xorg.conf
+            ;;
+        "n")
+            echo "QUITTING"
+            exit
+            ;;
+        *) echo "invalid option"
+            exit
+            ;;
+    esac
